@@ -115,6 +115,12 @@ void interpret_line(const char *line, bool program) {
 		token = strtok(args, ",");
 
 		while (token != NULL) {
+			// Ignore space after the comma.
+			if (token[0] == ' ') {
+				token = strdup(token + 1);
+			}
+
+			// Parse the arguments.
 			if (token[0] == '"' && token[strlen(token) - 1] == '"') {
 				// A normal string.
 				repl_print(strndup(token + 1, strlen(token) - 2));
@@ -138,6 +144,7 @@ void interpret_line(const char *line, bool program) {
 				repl_print(token);
 			}
 
+			// Go for the next one.
 			token = strtok(NULL, ",");
 		}
 
