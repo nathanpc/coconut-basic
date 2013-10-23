@@ -18,6 +18,11 @@
 	#include <stdio.h>
 #endif
 
+typedef struct {
+	char *array;
+	size_t size;
+} variables;
+
 
 // ******************************
 // **       Misc Helpers       **
@@ -87,6 +92,58 @@ void repl_gets(char *string) {
 // **       Interpreter        **
 // ******************************
 
+void basic_let() {
+	// Yeah, implement variables...
+}
+
+/**
+ * Implementation of BASIC's PRINT.
+ *
+ * @param token The token from strtok().
+ * @param args The arguments string.
+ */
+void basic_print(char *token, char *args) {
+	bool contains_quote = false;
+	token = strtok(args, ",");
+
+	while (token != NULL) {
+		// Ignore space after the comma.
+		if (token[0] == ' ') {
+			token = strdup(token + 1);
+		}
+
+		// Parse the arguments.
+		if (token[0] == '"' && token[strlen(token) - 1] == '"') {
+			// A normal string.
+			repl_print(strndup(token + 1, strlen(token) - 2));
+		} else if (token[0] == '"') {
+			// Start of a string that contains a ",".
+			contains_quote = true;
+			repl_print(strdup(token + 1));
+		} else if (contains_quote && token[strlen(token) - 1] != '"') {
+			// Middle of a string that contains a ",".
+			repl_print(",");
+			repl_print(token);
+			repl_print(",");
+		} else if (token[strlen(token) - 1] == '"') {
+			// End of a string.
+			contains_quote = false;
+
+			repl_print(",");
+			repl_print(strndup(token, strlen(token) - 1));
+		} else {
+			// Other stuff.
+			repl_print(token);
+		}
+
+		// Go for the next one.
+		token = strtok(NULL, ",");
+	}
+
+	// Print the last newline.
+	repl_print("\n");
+}
+
 /**
  * Interpret a line of code.
  *
@@ -111,45 +168,7 @@ void interpret_line(const char *line, bool program) {
 
 		// Get only the arguments.
 		char *args = strdup(line + 6);
-		bool contains_quote = false;
-		token = strtok(args, ",");
-
-		while (token != NULL) {
-			// Ignore space after the comma.
-			if (token[0] == ' ') {
-				token = strdup(token + 1);
-			}
-
-			// Parse the arguments.
-			if (token[0] == '"' && token[strlen(token) - 1] == '"') {
-				// A normal string.
-				repl_print(strndup(token + 1, strlen(token) - 2));
-			} else if (token[0] == '"') {
-				// Start of a string that contains a ",".
-				contains_quote = true;
-				repl_print(strdup(token + 1));
-			} else if (contains_quote && token[strlen(token) - 1] != '"') {
-				// Middle of a string that contains a ",".
-				repl_print(",");
-				repl_print(token);
-				repl_print(",");
-			} else if (token[strlen(token) - 1] == '"') {
-				// End of a string.
-				contains_quote = false;
-
-				repl_print(",");
-				repl_print(strndup(token, strlen(token) - 1));
-			} else {
-				// Other stuff.
-				repl_print(token);
-			}
-
-			// Go for the next one.
-			token = strtok(NULL, ",");
-		}
-
-		// Print the last newline.
-		repl_print("\n");
+		basic_print(token, args);
 	} else {
 		// Error: Unknown command.
 		repl_print("Error: Unknown command.");
