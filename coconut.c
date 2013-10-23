@@ -58,8 +58,18 @@ char* substr(const char *str, size_t begin, size_t len) {
 	return strndup(str + begin, len);
 }
 
-char* parse_args(char *line, char *linenum, char *keyword) {
-	return ;
+/**
+ *  Extracts each part of the function execution line..
+ *
+ *  @param line Program line.
+ *  @param linenum Line number.
+ *  @param keyword Function keyword.
+ *  @param args Arguments part of the string.
+ */
+void function_parts(char *line, char *linenum, char *keyword, char *args) {
+	strcpy(linenum, strtok(line, " "));
+	strcpy(keyword, strupper(strtok(NULL, " ")));
+	strcpy(args, strdup(line + strlen(linenum) + strlen(keyword) + 2));
 }
 
 
@@ -117,12 +127,11 @@ void basic_let() {
 /**
  * Implementation of BASIC's PRINT.
  *
- * @param token The token from strtok().
  * @param args The arguments string.
  */
-void basic_print(char *token, char *args) {
+void basic_print(char *args) {
 	bool contains_quote = false;
-	token = strtok(args, ",");
+	char *token = strtok(args, ",");
 
 	while (token != NULL) {
 		// Ignore space after the comma.
@@ -173,9 +182,11 @@ void interpret_line(const char *line, bool program) {
 	char cline[256];
 	strcpy(cline, line);
 
-	// Split by whitespace.
-	char *linenum = strtok(cline, " ");
-	char *keyword = strupper(strtok(NULL, " "));
+	// Get each part of the line.
+	char *linenum = (char*)malloc(5);
+	char *keyword = (char*)malloc(20);
+	char *args =    (char*)malloc(255);
+	function_parts(cline, linenum, keyword, args);
 
 	// Check for the first keyword.
 	if (strcmp(keyword, "PRINT") == 0) {
@@ -186,8 +197,7 @@ void interpret_line(const char *line, bool program) {
 		}
 
 		// Get only the arguments.
-		char *args = strdup(line + 6);
-		basic_print(token, args);
+		basic_print(args);
 	} else {
 		// Error: Unknown command.
 		repl_print("Error: Unknown command.\n");
