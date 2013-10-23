@@ -13,7 +13,7 @@
 
 #define REPL_TOKEN "> "
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__)
 	#define __COMPUTER__
 	#include <stdio.h>
 #endif
@@ -28,6 +28,12 @@ typedef struct {
 // **       Misc Helpers       **
 // ******************************
 
+/**
+ *  Capitalizes a whole string
+ *
+ *  @param str String to be capitalized.
+ *  @return Capitalized string.
+ */
 char* strupper(char *str) {
 	char *newstr, *p;
 	p = newstr = strdup(str);
@@ -36,12 +42,24 @@ char* strupper(char *str) {
 	return newstr;
 }
 
+/**
+ *  Extracts a substring.
+ *
+ *  @param str Original string.
+ *  @param begin Where to start the substring.
+ *  @param len Length of the substring.
+ *  @return Substring.
+ */
 char* substr(const char *str, size_t begin, size_t len) {
 	if (str == 0 || strlen(str) == 0 || strlen(str) < begin || strlen(str) < (begin + len)) {
 		return NULL;
 	}
 
 	return strndup(str + begin, len);
+}
+
+char* parse_args(char *line, char *linenum, char *keyword) {
+	return ;
 }
 
 
@@ -156,10 +174,11 @@ void interpret_line(const char *line, bool program) {
 	strcpy(cline, line);
 
 	// Split by whitespace.
-	char *token = strupper(strtok(cline, " "));
+	char *linenum = strtok(cline, " ");
+	char *keyword = strupper(strtok(NULL, " "));
 
 	// Check for the first keyword.
-	if (strcmp(token, "PRINT") == 0) {
+	if (strcmp(keyword, "PRINT") == 0) {
 		if (strtok(NULL, " ") == NULL) {
 			// Error: No arguments entered.
 			repl_print("Error: Not enough arguments.\n");
@@ -171,7 +190,7 @@ void interpret_line(const char *line, bool program) {
 		basic_print(token, args);
 	} else {
 		// Error: Unknown command.
-		repl_print("Error: Unknown command.");
+		repl_print("Error: Unknown command.\n");
 	}
 }
 
